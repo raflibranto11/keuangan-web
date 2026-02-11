@@ -1,45 +1,44 @@
 from flask import Flask, render_template, request, redirect
 import csv
+import os
 
-# WAJIB PALING ATAS
 app = Flask(__name__)
 
+FILE = "data.csv"
+
 
 # ========================
-# ROUTES
+# helper: pastikan file ada
 # ========================
+def ensure_file():
+    if not os.path.exists(FILE):
+        open(FILE, "w").close()
 
+
+# ========================
+# HOME (lihat data)
+# ========================
 @app.route("/")
 def index():
+    ensure_file()
+
     rows = []
-    with open("data.csv", newline="") as f:
+    with open(FILE, newline="") as f:
         reader = csv.reader(f)
         rows = list(reader)
 
     return render_template("index.html", data=rows)
 
 
-@app.route("/hapus/<int:index>")
-def hapus(index):
-    rows = []
-
-    with open("data.csv", newline="") as f:
-        reader = csv.reader(f)
-        rows = list(reader)
-
-    if 0 <= index < len(rows):
-        rows.pop(index)
-
-    with open("data.csv", "w", newline="") as f:
-        writer = csv.writer(f)
-        writer.writerows(rows)
-
-    return redirect("/")
-
-
 # ========================
-# RUN
+# TAMBAH DATA
 # ========================
+@app.route("/tambah", methods=["POST"])
+def tambah():
+    ensure_file()
 
-if __name__ == "__main__":
-    app.run(debug=True)
+    ket = request.form["keterangan"]
+    jumlah = request.form["jumlah"]
+    tipe = request.form["tipe"]
+
+    # ubah jadi minus kalau pengeluaran
