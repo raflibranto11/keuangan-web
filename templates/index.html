@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Keuangan Harian</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body{
+            font-family: Arial;
+            max-width: 500px;
+            margin:auto;
+            padding:20px;
+        }
+        input, select, button{
+            width:100%;
+            padding:10px;
+            margin:5px 0;
+        }
+        table{
+            width:100%;
+            border-collapse: collapse;
+        }
+        td, th{
+            border:1px solid #ddd;
+            padding:8px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>💰 Catatan Keuangan</h2>
+
+<form action="/add" method="post">
+    <input name="ket" placeholder="Keterangan" required>
+    <input name="jumlah" placeholder="Jumlah" required>
+    <select name="tipe">
+        <option value="income">Pemasukan</option>
+        <option value="expense">Pengeluaran</option>
+    </select>
+    <button type="submit">Tambah</button>
+</form>
+
+<h3>Total Saldo: Rp {{ total }}</h3>
+
+<table>
+<tr>
+    <th>Keterangan</th>
+    <th>Jumlah</th>
+    <th>Tipe</th>
+</tr>
+
+{% for row in data %}
+<tr>
+    <td>{{ row.keterangan }}</td>
+    <td>{{ row.jumlah }}</td>
+    <td>{{ row.tipe }}</td>
+</tr>
+{% endfor %}
+
+</table>
+
+</body>
+</html>
