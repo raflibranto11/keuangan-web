@@ -50,6 +50,16 @@ def add():
 
     return redirect("/")
 
+@app.route("/hapus/<int:index>")
+def hapus(index):
+    data = baca_data()
+
+    if 0 <= index < len(data):
+        data.pop(index)
+        simpan_data(data)
+
+    return redirect("/")
+
 
 init_file()
 

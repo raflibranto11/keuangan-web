@@ -53,6 +53,9 @@
     <td>{{ row.keterangan }}</td>
     <td>{{ row.jumlah }}</td>
     <td>{{ row.tipe }}</td>
+    <td>
+        <a href="/hapus/{{ loop.index0 }}">Hapus</a>
+    </td>
 </tr>
 {% endfor %}
 
