@@ -34,7 +34,6 @@
 
     </form>
 
-    <!-- TOTAL SALDO -->
     <div class="alert alert-info">
         <strong>Total Saldo:</strong> Rp {{ "{:,}".format(total) }}
     </div>
@@ -52,22 +51,22 @@
         <tbody>
         {% for row in data %}
             <tr>
-                <td>{{ row[0] }}</td>
+                <td>{{ row.keterangan }}</td>
 
                 <td>
-                    {% if row[2] == "expense" %}
+                    {% if row.tipe == "expense" %}
                         <span class="text-danger">
-                            - Rp {{ "{:,}".format(row[1]|int) }}
+                            - Rp {{ "{:,}".format(row.jumlah) }}
                         </span>
                     {% else %}
                         <span class="text-success">
-                            + Rp {{ "{:,}".format(row[1]|int) }}
+                            + Rp {{ "{:,}".format(row.jumlah) }}
                         </span>
                     {% endif %}
                 </td>
 
                 <td>
-                    <a href="/hapus/{{ loop.index0 }}" class="btn btn-danger btn-sm">
+                    <a href="/hapus/{{ row.id }}" class="btn btn-danger btn-sm">
                         Hapus
                     </a>
                 </td>

@@ -1,79 +1,89 @@
 from flask import Flask, render_template, request, redirect
+import sqlite3
 import os
-import csv
 
 app = Flask(__name__)
 
 BASE_DIR = os.getcwd()
-FILE = os.path.join(BASE_DIR, "data.csv")
+DB_PATH = os.path.join(BASE_DIR, "database.db")
 
 
-def ensure_file():
-    if not os.path.exists(FILE):
-        with open(FILE, "w", newline="") as f:
-            pass
+def get_db():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+def init_db():
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS transaksi (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            keterangan TEXT NOT NULL,
+            jumlah INTEGER NOT NULL,
+            tipe TEXT NOT NULL
+        )
+    """)
+
+    conn.commit()
+    conn.close()
 
 
 @app.route("/")
 def index():
-    ensure_file()
-    rows = []
+    init_db()
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM transaksi ORDER BY id DESC")
+    rows = cursor.fetchall()
+
     total = 0
-
-    with open(FILE, newline="") as f:
-        reader = csv.reader(f)
-        rows = list(reader)
-
     for row in rows:
-        try:
-            jumlah = int(row[1])
-            tipe = row[2]
+        if row["tipe"] == "expense":
+            total -= row["jumlah"]
+        else:
+            total += row["jumlah"]
 
-            if tipe == "expense":
-                total -= jumlah
-            else:
-                total += jumlah
-
-        except:
-            pass
+    conn.close()
 
     return render_template("index.html", data=rows, total=total)
 
 
-
 @app.route("/tambah", methods=["POST"])
 def tambah():
-    ensure_file()
-
-    ket = request.form.get("keterangan")
+    keterangan = request.form.get("keterangan")
     jumlah = int(request.form.get("jumlah"))
     tipe = request.form.get("tipe")
 
-    with open(FILE, "a", newline="") as f:
-        writer = csv.writer(f)
-        writer.writerow([ket, jumlah, tipe])
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "INSERT INTO transaksi (keterangan, jumlah, tipe) VALUES (?, ?, ?)",
+        (keterangan, jumlah, tipe)
+    )
+
+    conn.commit()
+    conn.close()
 
     return redirect("/")
 
 
+@app.route("/hapus/<int:id>")
+def hapus(id):
+    conn = get_db()
+    cursor = conn.cursor()
 
-@app.route("/hapus/<int:index>")
-def hapus(index):
-    ensure_file()
-
-    rows = []
-    with open(FILE, newline="") as f:
-        reader = csv.reader(f)
-        rows = list(reader)
-
-    if 0 <= index < len(rows):
-        rows.pop(index)
-
-    with open(FILE, "w", newline="") as f:
-        writer = csv.writer(f)
-        writer.writerows(rows)
+    cursor.execute("DELETE FROM transaksi WHERE id = ?", (id,))
+    conn.commit()
+    conn.close()
 
     return redirect("/")
+
 
 if __name__ == "__main__":
     app.run(debug=True)
